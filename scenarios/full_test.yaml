@@ -1,0 +1,59 @@
+name: full_billing_test
+description: Voice + SMS + Data with parallel block
+
+steps:
+  - action: call
+    from_modem: ec25_1
+    to_modem: ec25_2
+    hold_duration_sec: 30
+
+  - action: pause
+    duration_sec: 5
+
+  - action: call
+    from_modem: ec25_2
+    to_modem: ec25_1
+    hold_duration_sec: 30
+
+  - action: pause
+    duration_sec: 5
+
+  - action: sms_send
+    from_modem: ec25_1
+    to_modem: ec25_2
+    text: "Billing test SMS from ec25_1"
+
+  - action: pause
+    duration_sec: 5
+
+  - action: sms_send
+    from_modem: ec25_2
+    to_modem: ec25_1
+    text: "Billing test SMS from ec25_2"
+
+  - action: pause
+    duration_sec: 5
+
+  - action: parallel
+    steps:
+      - action: data_session
+        modem: ec25_1
+        actions:
+          - type: http_get
+            url: "https://httpbin.org/bytes/1048576"
+            timeout_sec: 30
+          - type: ping
+            host: "8.8.8.8"
+            count: 10
+          - type: idle
+            duration_sec: 10
+
+      - action: data_session
+        modem: ec25_2
+        actions:
+          - type: http_get
+            url: "https://httpbin.org/bytes/524288"
+            timeout_sec: 30
+          - type: ping
+            host: "1.1.1.1"
+            count: 5

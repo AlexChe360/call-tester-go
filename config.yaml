@@ -1,0 +1,32 @@
+# call-tester config
+# sudo systemctl stop ModemManager && sudo systemctl disable ModemManager
+# sudo apt install -y libqmi-utils udhcpc curl
+
+metrics:
+  enabled: true
+  listen: "0.0.0.0:9100"
+
+modems:
+  - name: ec25_1
+    at_port: /dev/ttyUSB11
+    qmi_device: /dev/cdc-wdm0
+    net_iface: wwan0
+    baud_rate: 115200
+    model: Quectel EC25-EUX
+    phone_number: "+7707*******"
+    apn: "internet"
+    apn_user: ""
+    apn_pass: ""
+    operator: Tele2
+
+  - name: ec25_2
+    at_port: 115200
+    qmi_device: /dev/ttyUSB15
+    net_iface: wwan1
+    baud_rate: 115200
+    model: Quectel EC25-EUX
+    phone_number: "+7707*******"
+    apn: "internet"
+    apn_user: ""
+    apn_pass: ""
+    operator: Tele2
