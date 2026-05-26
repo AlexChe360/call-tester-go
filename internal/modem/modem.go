@@ -16,6 +16,7 @@ const (
 	SMSSendTimeout   = 30 * time.Second
 )
 
+// Controller — управление модемом через AT-команды
 type Controller struct {
 	port     serial.Port
 	portName string
@@ -42,21 +43,17 @@ func New(portName string, baudRate int, name, phone, model, operator string) (*C
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", portName, err)
 	}
-	port.SetReadTimeout(100 * time.Microsecond)
+	port.SetReadTimeout(100 * time.Millisecond)
 	log.Printf("[%s] port %s opened", name, portName)
 	return &Controller{
-		port:     port,
-		portName: portName,
-		Name:     name,
-		Phone:    phone,
-		Model:    model,
-		Operator: operator,
+		port: port, portName: portName,
+		Name: name, Phone: phone, Model: model, Operator: operator,
 	}, nil
 }
 
 func (c *Controller) Close() error { return c.port.Close() }
 
-// ---------- Low-level AT -------------
+// ---- Low-level AT ----
 
 func (c *Controller) SendCommand(cmd string, timeout time.Duration) (string, error) {
 	c.flushInput()
@@ -72,7 +69,7 @@ func (c *Controller) SendCommand(cmd string, timeout time.Duration) (string, err
 	return resp, nil
 }
 
-func (c *Controller) SendCommandOk(cmd string, timeout time.Duration) (string, error) {
+func (c *Controller) SendCommandOK(cmd string, timeout time.Duration) (string, error) {
 	resp, err := c.SendCommand(cmd, timeout)
 	if err != nil {
 		return "", err
@@ -99,9 +96,7 @@ func (c *Controller) WaitFor(marker string, timeout time.Duration) (string, erro
 		if time.Since(start) > timeout {
 			return resp.String(), fmt.Errorf("timeout waiting for '%s'", marker)
 		}
-
 		n, _ := c.port.Read(buf)
-		
 		if n > 0 {
 			resp.Write(buf[:n])
 			if strings.Contains(resp.String(), marker) {
@@ -121,15 +116,14 @@ func (c *Controller) ReadURC(timeout time.Duration) string {
 		if time.Since(start) > timeout {
 			return resp.String()
 		}
-
 		n, _ := c.port.Read(buf)
 		if n > 0 {
 			resp.Write(buf[:n])
 			s := resp.String()
 			if strings.Contains(s, "RING") || strings.Contains(s, "+CLIP") ||
-			   strings.Contains(s, "+CMTI") || strings.Contains(s, "+CMT:") ||
-				 strings.Contains(s, "NO CARRIER") || strings.Contains(s, "BUSY") {
-         break
+				strings.Contains(s, "+CMTI") || strings.Contains(s, "+CMT:") ||
+				strings.Contains(s, "NO CARRIER") || strings.Contains(s, "BUSY") {
+				break
 			}
 		} else {
 			time.Sleep(50 * time.Millisecond)
@@ -154,10 +148,10 @@ func (c *Controller) readResponse(timeout time.Duration) (string, error) {
 			resp.Write(buf[:n])
 			s := resp.String()
 			if strings.Contains(s, "OK\r") || strings.Contains(s, "OK\n") ||
-			   strings.Contains(s, "ERROR") || strings.Contains(s, "NO CARRIER") ||
-				 strings.Contains(s, "BUSY") || strings.Contains(s, "NO ANSWER") ||
-				 strings.Contains(s, "NO DIALTONE") {
-         break
+				strings.Contains(s, "ERROR") || strings.Contains(s, "NO CARRIER") ||
+				strings.Contains(s, "BUSY") || strings.Contains(s, "NO ANSWER") ||
+				strings.Contains(s, "NO DIALTONE") {
+				break
 			}
 		} else {
 			time.Sleep(50 * time.Millisecond)
@@ -176,23 +170,23 @@ func (c *Controller) flushInput() {
 	}
 }
 
-// ----------- Init --------------
+// ---- Init ----
 
 func (c *Controller) Init() error {
 	log.Printf("[%s] init (%s, %s)", c.Name, c.Model, c.Operator)
-	c.SendCommandOk("ATE0", DefaultTimeout)
-	if _, err := c.SendCommandOk("AT", DefaultTimeout); err != nil {
+	c.SendCommandOK("ATE0", DefaultTimeout)
+	if _, err := c.SendCommandOK("AT", DefaultTimeout); err != nil {
 		return err
 	}
 	resp, _ := c.SendCommand("AT+CREG?", DefaultTimeout)
 	if !strings.Contains(resp, ",1") && !strings.Contains(resp, ",5") {
 		log.Printf("[%s] WARNING: not registered", c.Name)
 	}
-	c.SendCommandOk("AT+CLIP=1", DefaultTimeout)
-	c.SendCommandOk("AT+CMEE=2", DefaultTimeout)
-	c.SendCommandOk("AT+CMGF=1", DefaultTimeout)
-	c.SendCommandOk(`AT+CSCS="GSM"`, DefaultTimeout)
-	c.SendCommandOk("AT+CNMI=2,1,0,0,0", DefaultTimeout)
+	c.SendCommandOK("AT+CLIP=1", DefaultTimeout)
+	c.SendCommandOK("AT+CMEE=2", DefaultTimeout)
+	c.SendCommandOK("AT+CMGF=1", DefaultTimeout)
+	c.SendCommandOK(`AT+CSCS="GSM"`, DefaultTimeout)
+	c.SendCommandOK("AT+CNMI=2,1,0,0,0", DefaultTimeout)
 	log.Printf("[%s] ready", c.Name)
 	return nil
 }
@@ -215,7 +209,7 @@ func (c *Controller) GetSignalQuality() (rssi, ber int, err error) {
 	return 0, 0, fmt.Errorf("parse CSQ failed")
 }
 
-// -------- Voice ------------
+// ---- Voice ----
 
 func (c *Controller) Dial(number string) (bool, error) {
 	log.Printf("[%s] dialing %s", c.Name, number)
@@ -228,38 +222,69 @@ func (c *Controller) Dial(number string) (bool, error) {
 		}
 		urc := c.ReadURC(2 * time.Second)
 		if strings.Contains(urc, "NO CARRIER") || strings.Contains(urc, "BUSY") ||
-		   strings.Contains(urc, "NO ANSWER") || strings.Contains(urc, "NO DIALTONE") {
-       return false, nil
+			strings.Contains(urc, "NO ANSWER") || strings.Contains(urc, "NO DIALTONE") {
+			return false, nil
 		}
 		clcc, err := c.SendCommand("AT+CLCC", DefaultTimeout)
-		if err == nil && strings.Contains(clcc, ",0,0,") {
-			log.Printf("[%s] call established", c.Name)
-			return true, nil
+		if err == nil {
+			// Ищем stat=0 (active) для исходящего (dir=0)
+			for _, line := range strings.Split(clcc, "\n") {
+				if strings.Contains(line, "+CLCC:") {
+					parts := strings.Split(line, ",")
+					if len(parts) >= 3 {
+						dir := strings.TrimSpace(parts[1])
+						stat := strings.TrimSpace(parts[2])
+						if dir == "0" && stat == "0" {
+							log.Printf("[%s] call established (active)", c.Name)
+							return true, nil
+						}
+					}
+				}
+			}
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
 }
 
 func (c *Controller) WaitAndAnswer(timeout time.Duration) (caller string, ok bool, err error) {
-	log.Printf("[%s] waiting for incoming call (%v)", c.Name, timeout)
+	log.Printf("[%s] waiting for incoming call via polling (%v)", c.Name, timeout)
 	start := time.Now()
 	for {
 		if time.Since(start) > timeout {
 			return "", false, nil
 		}
-		urc := c.ReadURC(2 * time.Second)
-		if strings.Contains(urc, "RING") {
-			caller = parseCLIP(urc)
-			time.Sleep(500 * time.Millisecond)
-			resp, err := c.SendCommand("ATA", DefaultTimeout)
-			if err != nil {
-				return caller, false, err
-			}
-			if strings.Contains(resp, "OK") || strings.Contains(resp, "CONNECT") {
-				log.Printf("[%s] answer from %T+s", c.Name, caller)
-				return caller, true, nil
+
+		// Polling — проверяем есть ли входящий вызов через CLCC
+		resp, err := c.SendCommand("AT+CLCC", DefaultTimeout)
+		if err == nil {
+			// Ищем входящий (dir=1, stat=4=incoming или stat=0=active)
+			for _, line := range strings.Split(resp, "\n") {
+				if !strings.Contains(line, "+CLCC:") {
+					continue
+				}
+				// +CLCC: 1,1,4,0,0,"+77076421165",145  (dir=1=MT, stat=4=incoming)
+				parts := strings.Split(line, ",")
+				if len(parts) >= 7 {
+					dir := strings.TrimSpace(parts[1])
+					stat := strings.TrimSpace(parts[2])
+					if dir == "1" && stat == "4" {
+						// Входящий — отвечаем
+						caller = strings.Trim(strings.TrimSpace(parts[5]), "\"")
+						log.Printf("[%s] incoming call from %s, answering", c.Name, caller)
+						time.Sleep(300 * time.Millisecond)
+						ansResp, err := c.SendCommand("ATA", DefaultTimeout)
+						if err != nil {
+							return caller, false, err
+						}
+						if strings.Contains(ansResp, "OK") || strings.Contains(ansResp, "CONNECT") {
+							log.Printf("[%s] answered", c.Name)
+							return caller, true, nil
+						}
+					}
+				}
 			}
 		}
+		time.Sleep(time.Second)
 	}
 }
 
@@ -273,27 +298,28 @@ func parseCLIP(urc string) string {
 		if !strings.Contains(line, "+CLIP:") {
 			continue
 		}
-		if _, after, found := strings.Cut(line, "\""); found {
-			if before, _, found := strings.Cut(after, "\""); found {
-				return before
-			} 
+		if i := strings.Index(line, "\""); i >= 0 {
+			rest := line[i+1:]
+			if j := strings.Index(rest, "\""); j >= 0 {
+				return rest[:j]
+			}
 		}
 	}
 	return "unknown"
 }
 
-// ------------- SMS ----------------
+// ---- SMS ----
 
 func (c *Controller) SendSMS(number, text string) (bool, error) {
 	log.Printf("[%s] SMS to %s (%d chars)", c.Name, number, len(text))
-	c.SendCommandOk("AT+CMGF=1", DefaultTimeout)
+	c.SendCommandOK("AT+CMGF=1", DefaultTimeout)
 
 	cmd := fmt.Sprintf(`AT+CMGS="%s"`, number)
 	c.flushInput()
 	c.port.Write([]byte(cmd + "\r"))
 
-  if _, err := c.WaitFor(">", 5*time.Second); err != nil {
-		return false, fmt.Errorf("no '>' promt: %w", err)    
+	if _, err := c.WaitFor(">", 5*time.Second); err != nil {
+		return false, fmt.Errorf("no '>' prompt: %w", err)
 	}
 
 	payload := append([]byte(text), 0x1A)
@@ -306,7 +332,7 @@ func (c *Controller) SendSMS(number, text string) (bool, error) {
 		if strings.Contains(resp, "ERROR") {
 			return false, fmt.Errorf("SMS error: %s", strings.TrimSpace(resp))
 		}
-		return false, err 
+		return false, err
 	}
 	c.WaitFor("OK", 5*time.Second)
 	log.Printf("[%s] SMS sent", c.Name)
@@ -314,29 +340,46 @@ func (c *Controller) SendSMS(number, text string) (bool, error) {
 }
 
 func (c *Controller) WaitForSMS(timeout time.Duration) (from, text string, ok bool, err error) {
-	log.Printf("[%s] waiting for SMS (%v)", c.Name, timeout)
+	log.Printf("[%s] waiting for SMS via polling (%v)", c.Name, timeout)
 	start := time.Now()
-
 	for {
 		if time.Since(start) > timeout {
 			return "", "", false, nil
 		}
-		urc := c.ReadURC(2 * time.Second)
-		if strings.Contains(urc, "+CMTI:") {
-			idx := parseCMTI(urc)
-			if idx < 0 {
-         continue
+
+		// Polling — проверяем есть ли непрочитанные SMS
+		resp, err := c.SendCommand(`AT+CMGL="REC UNREAD"`, DefaultTimeout)
+		if err == nil && strings.Contains(resp, "+CMGL:") {
+			// Нашли SMS! Парсим первую
+			lines := strings.Split(resp, "\n")
+			for i, line := range lines {
+				if strings.Contains(line, "+CMGL:") {
+					// +CMGL: idx,"REC UNREAD","+77076421165","","26/05/26,13:05:48+24"
+					parts := strings.Split(line, ",")
+					// Индекс
+					var idx int
+					idxPart := strings.TrimSpace(strings.Split(line, ":")[1])
+					fmt.Sscanf(idxPart, "%d", &idx)
+					// Номер отправителя — 3-е поле
+					if len(parts) >= 3 {
+						from = strings.Trim(strings.TrimSpace(parts[2]), "\"")
+					}
+					// Текст — следующая строка
+					if i+1 < len(lines) {
+						text = strings.TrimSpace(lines[i+1])
+					}
+					log.Printf("[%s] SMS received from %s: %s", c.Name, from, text)
+					// Удаляем
+					c.SendCommand(fmt.Sprintf("AT+CMGD=%d", idx), DefaultTimeout)
+					return from, text, true, nil
+				}
 			}
-			from, text, err = c.ReadSMS(idx)
-			if err != nil {
-				return "", "", false, err
-			}
-			c.SendCommand(fmt.Sprintf("AT+CMGD=%d", idx), DefaultTimeout)
-			return from, text, true, nil
-	  }
+		}
+
+		// Пауза между polling
+		time.Sleep(3 * time.Second)
 	}
 }
-
 
 func (c *Controller) ReadSMS(index int) (from, text string, err error) {
 	resp, err := c.SendCommand(fmt.Sprintf("AT+CMGR=%d", index), DefaultTimeout)
@@ -371,11 +414,9 @@ func parseCMTI(urc string) int {
 		parts := strings.Split(line, ",")
 		if len(parts) >= 2 {
 			var idx int
-			fmt.Scanf(strings.TrimSpace(parts[1]), "%d", &idx)
+			fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &idx)
 			return idx
 		}
 	}
 	return -1
 }
-
-
