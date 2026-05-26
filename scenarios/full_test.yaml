@@ -34,26 +34,27 @@ steps:
   - action: pause
     duration_sec: 5
 
-  - action: parallel
-    steps:
-      - action: data_session
-        modem: ec25_1
-        actions:
-          - type: http_get
-            url: "https://httpbin.org/bytes/1048576"
-            timeout_sec: 30
-          - type: ping
-            host: "8.8.8.8"
-            count: 10
-          - type: idle
-            duration_sec: 10
+  - action: data_session
+    modem: ec25_1
+    actions:
+      - type: http_get
+        url: "https://httpbin.org/bytes/1048576"
+        timeout_sec: 30
+      - type: ping
+        host: "8.8.8.8"
+        count: 10
+      - type: idle
+        duration_sec: 10
 
-      - action: data_session
-        modem: ec25_2
-        actions:
-          - type: http_get
-            url: "https://httpbin.org/bytes/524288"
-            timeout_sec: 30
-          - type: ping
-            host: "1.1.1.1"
-            count: 5
+  - action: pause
+    duration_sec: 5
+
+  - action: data_session
+    modem: ec25_2
+    actions:
+      - type: http_get
+        url: "https://httpbin.org/bytes/524288"
+        timeout_sec: 30
+      - type: ping
+        host: "1.1.1.1"
+        count: 5

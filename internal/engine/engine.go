@@ -299,7 +299,7 @@ func execDataSession(reg *Registry, report *Report, step models.ScenarioStep, sc
 	session := data.NewQMISession(step.Modem, cfg.QMIDevice, cfg.NetIface,
 		cfg.APN, cfg.APNUser, cfg.APNPass, tableID)
 
-	rxBefore, txBefore := session.GetStatus()
+//	rxBefore, txBefore := session.GetStatus()
 
 	if err := session.Connect(); err != nil {
 		rec.ErrorMsg = err.Error()
@@ -310,6 +310,7 @@ func execDataSession(reg *Registry, report *Report, step models.ScenarioStep, sc
 	rec.IPAddress = session.IPAddress
 
 	session.WaitConnectivity(20 * time.Second)
+	rxBefore, txBefore := session.GetStatus()
 
 	for _, action := range step.Actions {
 		result := data.ExecuteAction(session, action)

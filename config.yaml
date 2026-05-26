@@ -13,7 +13,7 @@ modems:
     net_iface: wwan0
     baud_rate: 115200
     model: Quectel EC25-EUX
-    phone_number: "+7707643712"
+    phone_number: "+77076423712"
     apn: "internet"
     apn_user: ""
     apn_pass: ""

@@ -44,7 +44,7 @@ func (q *QMISession) Connect() error {
 		apnStr = fmt.Sprintf("apn=%s,username=%s,password=%s,auth=both,ip-type=4", q.APN, q.APNUser, q.APNPass)
 	}
 
-	out, err := q.shOut("qmicli -d %s --device-open-proxy --wds-start-network='%s' --client-no-release-cid", q.QMIDevice, apnStr)
+	out, err := q.shOut("qmicli -d %s --wds-start-network='%s' --client-no-release-cid", q.QMIDevice, apnStr)
 	if err != nil || !strings.Contains(out, "Network started") {
 		return fmt.Errorf("qmicli start failed: %s %v", out, err)
 	}
@@ -82,7 +82,7 @@ func (q *QMISession) Disconnect() {
 	}
 	log.Printf("[%s] QMI disconnect", q.Modem)
 	q.sh("pkill -f 'udhcpc.*%s' 2>/dev/null || true", q.NetIface)
-	q.sh("qmicli -d --device-open-proxy --wds-stop=network=disable-autoconnect 2?/dev/null || true", q.NetIface)
+	q.sh("qmicli -d --wds-stop=network=disable-autoconnect 2?/dev/null || true", q.NetIface)
 	if q.IPAddress != "" {
 		q.sh("ip rule del from $s table %d 2>/dev/null || true", q.IPAddress, q.TableID)
 	}
@@ -93,9 +93,9 @@ func (q *QMISession) Disconnect() {
 
 func (q *QMISession) GetStatus() (rx, tx uint64) {
 	rxOut, _ := q.shOut("cat /sys/class/net/%s/statistics/rx_bytes", q.NetIface)
-	txOut, _ := q.shOut("cat /sys/class.net/%s/statistics/tx_bytes", q.NetIface)
-	fmt.Sscan(strings.TrimSpace(rxOut), "%d", &rx)
-	fmt.Sscan(strings.TrimSpace(txOut), "%d", &tx)
+	txOut, _ := q.shOut("cat /sys/class/net/%s/statistics/tx_bytes", q.NetIface)
+	fmt.Sscanf(strings.TrimSpace(rxOut), "%d", &rx)
+	fmt.Sscanf(strings.TrimSpace(txOut), "%d", &tx)
 	return
 }
 
@@ -120,6 +120,8 @@ func (q *QMISession) sh(format string, args ...interface{}) error {
 
 func (q *QMISession) shOut(format string, args ...interface{}) (string, error) {
 	cmd := fmt.Sprintf(format, args...)
-	out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	c := exec.Command("bash", "-c", cmd)
+	c.Env = append(c.Environ(), "LC_ALL=C")
+	out, err := c.Output()
 	return string(out), err
 }

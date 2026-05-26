@@ -1,0 +1,182 @@
+{
+  "scenario_name": "full_billing_test",
+  "executrd_at": "2026-05-26T15:42:15.095259452+05:00",
+  "calls": [
+    {
+      "id": "2d54357f-e9eb-41a0-9e05-fed494e2d421",
+      "direction": "outgoing",
+      "from_modem": "ec25_1",
+      "number_a": "+77076423712",
+      "to_modem": "ec25_2",
+      "number_b": "+77076421165",
+      "call_start": "2026-05-26T15:42:15.095339971+05:00",
+      "answer_time": "2026-05-26T15:42:23.830375098+05:00",
+      "call_end": "2026-05-26T15:42:54.950678751+05:00",
+      "talk_duration_sec": 31.120303654,
+      "total_duration_sec": 39.85533878,
+      "status": "answered",
+      "scenario_name": "full_billing_test",
+      "step_index": 0
+    },
+    {
+      "id": "36d32d2d-c1b2-4856-b7ba-35ddbfa42cb8",
+      "direction": "outgoing",
+      "from_modem": "ec25_2",
+      "number_a": "+77076421165",
+      "to_modem": "ec25_1",
+      "number_b": "+77076423712",
+      "call_start": "2026-05-26T15:42:59.950858351+05:00",
+      "answer_time": "2026-05-26T15:43:08.700368995+05:00",
+      "call_end": "2026-05-26T15:43:39.789897325+05:00",
+      "talk_duration_sec": 31.08952833,
+      "total_duration_sec": 39.839038937,
+      "status": "answered",
+      "scenario_name": "full_billing_test",
+      "step_index": 2
+    }
+  ],
+  "sms": [
+    {
+      "id": "4713410d-cd92-4c4e-b7a4-0a56ac7e1ded",
+      "direction": "outgoing",
+      "from_modem": "ec25_1",
+      "number_a": "+77076423712",
+      "to_modem": "ec25_2",
+      "number_b": "+77076421165",
+      "text": "Billing test SMS from ec25_1",
+      "text_length": 28,
+      "sms_parts": 1,
+      "sent_at": "2026-05-26T15:43:51.042201202+05:00",
+      "received_at": "2026-05-26T15:43:51.042202998+05:00",
+      "delivery_time_sec": 0.000001815,
+      "status": "delivered",
+      "scenario_name": "full_billing_test",
+      "step_index": 4
+    },
+    {
+      "id": "447d47ce-2d75-47d6-a728-6ddb876254f9",
+      "direction": "outgoing",
+      "from_modem": "ec25_2",
+      "number_a": "+77076421165",
+      "to_modem": "ec25_1",
+      "number_b": "+77076423712",
+      "text": "Billing test SMS from ec25_2",
+      "text_length": 28,
+      "sms_parts": 1,
+      "sent_at": "2026-05-26T15:44:02.085250528+05:00",
+      "received_at": "2026-05-26T15:44:02.085252232+05:00",
+      "delivery_time_sec": 0.000001685,
+      "status": "delivered",
+      "scenario_name": "full_billing_test",
+      "step_index": 6
+    }
+  ],
+  "data": [
+    {
+      "id": "a3e38e5b-4d69-4afc-81e1-9959dfee788a",
+      "modem": "ec25_1",
+      "number": "+77076423712",
+      "apn": "internet",
+      "operator": "Tele2",
+      "ip_address": "10.228.80.137",
+      "session_start": "2026-05-26T15:44:07.089359324+05:00",
+      "session_end": "2026-05-26T15:44:29.319414044+05:00",
+      "session_duration_sec": 22.23005472,
+      "total_bytes_rx": 112166,
+      "total_bytes_tx": 5431,
+      "total_bytes": 117597,
+      "actions": [
+        {
+          "action_type": "http_get",
+          "url": "https://httpbin.org/bytes/1048576",
+          "host": "",
+          "started_at": "2026-05-26T15:44:07.935316721+05:00",
+          "ended_at": "2026-05-26T15:44:10.157099935+05:00",
+          "duration_sec": 2.221783196,
+          "bytes_rx": 111194,
+          "bytes_tx": 4455,
+          "success": true,
+          "http_status": 200
+        },
+        {
+          "action_type": "ping",
+          "host": "8.8.8.8",
+          "started_at": "2026-05-26T15:44:10.15712825+05:00",
+          "ended_at": "2026-05-26T15:44:19.276463964+05:00",
+          "duration_sec": 9.119335732,
+          "bytes_rx": 972,
+          "bytes_tx": 928,
+          "success": true,
+          "ping_status": "PING 8.8.8.8 (8.8.8.8) from 10.228.80.137 wwan0: 56(84) bytes of data.\n64 bytes from 8.8.8.8: icmp_seq=1 ttl=105 time=90.4 ms\n64 bytes from 8.8.8.8: icmp_seq=2 ttl=105 time=88.4 ms\n64 bytes from 8.8.8.8: icmp_seq=3 ttl=105 time=110 ms\n64 bytes from 8.8.8.8: icmp_seq=4 ttl=105 time=107 ms\n64 bytes from 8.8.8.8: icmp_seq=5 ttl=105 time=105 ms\n64 bytes from 8.8.8.8: icmp_seq=6 ttl=105 time=111 ms\n64 bytes from 8.8.8.8: icmp_seq=7 ttl=105 time=102 ms\n64 bytes from 8.8.8.8: icmp_seq=8 ttl=105 time=110 ms\n64 bytes from 8.8.8.8: icmp_seq=9 ttl=105 time=109 ms\n64 bytes from 8.8.8.8: icmp_seq=10 ttl=105 time=99.4 ms\n\n--- 8.8.8.8 ping statistics ---\n10 packets transmitted, 10 received, 0% packet loss, time 9012ms\nrtt min/avg/max/mdev = 88.421/103.125/111.234/7.709 ms\n"
+        },
+        {
+          "action_type": "idle",
+          "host": "",
+          "started_at": "2026-05-26T15:44:19.276499168+05:00",
+          "ended_at": "2026-05-26T15:44:29.291921064+05:00",
+          "duration_sec": 10.015421896,
+          "bytes_rx": 0,
+          "bytes_tx": 48,
+          "success": true
+        }
+      ],
+      "status": "completed",
+      "scenario_name": "full_billing_test",
+      "step_index": 8
+    },
+    {
+      "id": "5cbfec6d-287e-42e6-9530-5e48f6526d18",
+      "modem": "ec25_2",
+      "number": "+77076421165",
+      "apn": "internet",
+      "operator": "Tele2",
+      "ip_address": "10.220.15.99",
+      "session_start": "2026-05-26T15:44:34.323802262+05:00",
+      "session_end": "2026-05-26T15:44:41.911287564+05:00",
+      "session_duration_sec": 7.587485302,
+      "total_bytes_rx": 111849,
+      "total_bytes_tx": 5019,
+      "total_bytes": 116868,
+      "actions": [
+        {
+          "action_type": "http_get",
+          "url": "https://httpbin.org/bytes/524288",
+          "host": "",
+          "started_at": "2026-05-26T15:44:35.307978474+05:00",
+          "ended_at": "2026-05-26T15:44:37.8198756+05:00",
+          "duration_sec": 2.511897145,
+          "bytes_rx": 111245,
+          "bytes_tx": 4511,
+          "success": true,
+          "http_status": 200
+        },
+        {
+          "action_type": "ping",
+          "host": "1.1.1.1",
+          "started_at": "2026-05-26T15:44:37.819904841+05:00",
+          "ended_at": "2026-05-26T15:44:41.88467431+05:00",
+          "duration_sec": 4.064769488,
+          "bytes_rx": 604,
+          "bytes_tx": 508,
+          "success": true,
+          "ping_status": "PING 1.1.1.1 (1.1.1.1) from 10.220.15.99 wwan1: 56(84) bytes of data.\n64 bytes from 1.1.1.1: icmp_seq=1 ttl=53 time=61.3 ms\n64 bytes from 1.1.1.1: icmp_seq=2 ttl=53 time=42.1 ms\n64 bytes from 1.1.1.1: icmp_seq=3 ttl=53 time=66.0 ms\n64 bytes from 1.1.1.1: icmp_seq=4 ttl=53 time=64.3 ms\n64 bytes from 1.1.1.1: icmp_seq=5 ttl=53 time=52.5 ms\n\n--- 1.1.1.1 ping statistics ---\n5 packets transmitted, 5 received, 0% packet loss, time 4005ms\nrtt min/avg/max/mdev = 42.053/57.235/66.047/8.920 ms\n"
+        }
+      ],
+      "status": "completed",
+      "scenario_name": "full_billing_test",
+      "step_index": 10
+    }
+  ],
+  "summary": {
+    "total_calls": 2,
+    "successful_calls": 2,
+    "failed_calls": 0,
+    "total_sms": 2,
+    "successful_sms": 2,
+    "failed_sms": 0,
+    "total_data": 2,
+    "successful_data_sessions": 2,
+    "failed_data_sessions": 0,
+    "total_bytes": 234465
+  }
+}
