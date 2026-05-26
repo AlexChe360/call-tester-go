@@ -1,5 +1,5 @@
 BINARY = call-tester
-RPI_HOST = pi@192.168.0.107
+RPI_HOST = pi@192.168.0.108
 RPI_DIR = /home/pi/call-tester
 
 build:
