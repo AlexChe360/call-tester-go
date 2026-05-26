@@ -8,24 +8,24 @@ metrics:
 
 modems:
   - name: ec25_1
-    at_port: /dev/ttyUSB11
+    at_port: /dev/ttyUSB2
     qmi_device: /dev/cdc-wdm0
     net_iface: wwan0
     baud_rate: 115200
     model: Quectel EC25-EUX
-    phone_number: "+7707*******"
+    phone_number: "+7707643712"
     apn: "internet"
     apn_user: ""
     apn_pass: ""
     operator: Tele2
 
   - name: ec25_2
-    at_port: 115200
-    qmi_device: /dev/ttyUSB15
+    at_port: /dev/ttyUSB6
+    qmi_device: /dev/cdc-wdm1
     net_iface: wwan1
     baud_rate: 115200
     model: Quectel EC25-EUX
-    phone_number: "+7707*******"
+    phone_number: "+77076421165"
     apn: "internet"
     apn_user: ""
     apn_pass: ""
